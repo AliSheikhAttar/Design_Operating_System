@@ -1,14 +1,22 @@
 #include "types.h"
 #include "user.h"
-#include "stat.h"
-#include "types.h"
-#include "stat.h"
-#include "user.h"
+// #include "stat.h"
+// #include "types.h"
+// #include "stat.h"
+// #include "user.h"
+// #include "fcntl.h"
+// #include "types.h"
+// #include "stat.h"
+// #include "user.h"
 #include "fcntl.h"
-#include "types.h"
-#include "stat.h"
-#include "user.h"
-#include "fcntl.h"
+
+enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+struct proc_info {
+    enum procstate state;  // Process state
+    int pid;               // Process ID
+    struct proc *parent;   // Parent process
+    char name[16];         // Process name (debugging)
+};
 
 int main(int argc, char *argv[]) {
   int state_t = -1; // -1 means do not filter by state
@@ -22,14 +30,7 @@ int main(int argc, char *argv[]) {
   }
 
 // Assuming enum procstate is defined elsewhere in the code
-extern enum procstate;
-enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
-struct proc_info {
-    enum procstate state;  // Process state
-    int pid;               // Process ID
-    struct proc *parent;   // Parent process
-    char name[16];         // Process name (debugging)
-};
+
 struct proc_info *process_info_t;
   process_info_t = (struct proc_info*) malloc(sizeof(struct proc_info));
   ps(state_t, pid_t, process_info_t);

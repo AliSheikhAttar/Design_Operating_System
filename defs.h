@@ -9,12 +9,15 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
-struct proc_info {
-    enum procstate state;  // Process state
-    int pid;               // Process ID
-    struct proc *parent;   // Parent process
-    char name[16];         // Process name (debugging)
-};
+struct proc_info;
+
+// enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+// struct proc_info {
+//     enum procstate state;  // Process state
+//     int pid;               // Process ID
+//     struct proc *parent;   // Parent process
+//     char name[16];         // Process name (debugging)
+// };
 
 // bio.c
 void            binit(void);
