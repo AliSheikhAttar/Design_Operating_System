@@ -10,6 +10,7 @@ struct cpu {
   struct proc *proc;           // The process running on this cpu or null
 };
 
+
 extern struct cpu cpus[NCPU];
 extern int ncpu;
 
@@ -56,3 +57,10 @@ struct proc {
 //   original data and bss
 //   fixed-size stack
 //   expandable heap
+
+struct proc_info {
+    enum procstate state;  // Process state
+    int pid;               // Process ID
+    struct proc *parent;   // Parent process
+    char name[16];         // Process name (debugging)
+};

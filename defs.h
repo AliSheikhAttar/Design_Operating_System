@@ -9,6 +9,12 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
+struct proc_info {
+    enum procstate state;  // Process state
+    int pid;               // Process ID
+    struct proc *parent;   // Parent process
+    char name[16];         // Process name (debugging)
+};
 
 // bio.c
 void            binit(void);
@@ -120,7 +126,7 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-int             ps(int, int);
+int             ps(int, int, struct proc_info*);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
