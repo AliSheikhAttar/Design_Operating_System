@@ -532,3 +532,27 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+int
+ps()
+{
+  static char *states[] = {
+  [UNUSED]    "unused",
+  [EMBRYO]    "embryo",
+  [SLEEPING]  "sleep ",
+  [RUNNABLE]  "runble",
+  [RUNNING]   "run   ",
+  [ZOMBIE]    "zombie"
+  };
+  struct proc *p;
+  sti();  //enable interrups in this processor
+  acquire(&ptable.lock);
+  cprintf("PID\tState\t\tName\n");  // ("name \t pid \t state \t \n")
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if(p->state == UNUSED)
+            continue;
+        cprintf("%d\t%s\t%s\n", p->pid, states[p->state], p->name);
+    }
+    release(&ptable.lock);
+    return 22; //0?
+}
