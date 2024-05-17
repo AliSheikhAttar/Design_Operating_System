@@ -2,6 +2,7 @@
 #include "user.h"
 #include "fcntl.h"
 
+
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 struct proc_info {
     enum procstate state;  // Process state
@@ -25,7 +26,7 @@ int main(int argc, char *argv[]) {
 struct proc_info *process_info_t;
   process_info_t = (struct proc_info*) malloc(sizeof(struct proc_info));
   ps(state_t, pid_t, process_info_t);
-  printf(process_info_t-> pid, process_info_t->state, process_info_t->name);
+  //printf("pid: %d state: %d name: %s\n", (int)process_info_t->pid, (int)process_info_t->state, (char*)process_info_t->name);
   exit();
   free(process_info_t);
 }
