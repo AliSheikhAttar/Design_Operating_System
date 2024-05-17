@@ -533,26 +533,39 @@ procdump(void)
   }
 }
 
-int
-ps()
-{
-  static char *states[] = {
-  [UNUSED]    "unused",
-  [EMBRYO]    "embryo",
-  [SLEEPING]  "sleep ",
-  [RUNNABLE]  "runble",
-  [RUNNING]   "run   ",
-  [ZOMBIE]    "zombie"
-  };
+int sys_ps(void) {
+  int state;
+  int pid;
   struct proc *p;
-  sti();  //enable interrups in this processor
-  acquire(&ptable.lock);
-  cprintf("PID\tState\t\tName\n");  // ("name \t pid \t state \t \n")
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-        if(p->state == UNUSED)
-            continue;
-        cprintf("%d\t%s\t%s\n", p->pid, states[p->state], p->name);
+  char *state_name;
+
+  // Get the arguments from user space
+  if (argint(0, &state) < 0)
+    return -1;
+  if (argint(1, &pid) < 0)
+    return -1;
+
+  // Iterate through the process table
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+    if (p->state == UNUSED)
+      state_name = "UNUSED";
+    else if (p->state == EMBRYO)
+      state_name = "EMBRYO";
+    else if (p->state == SLEEPING)
+      state_name = "SLEEPING";
+    else if (p->state == RUNNABLE)
+      state_name = "RUNNABLE";
+    else if (p->state == RUNNING)
+      state_name = "RUNNING";
+    else if (p->state == ZOMBIE)
+      state_name = "ZOMBIE";
+    else
+      state_name = "???";
+
+    // Filter based on state and PID
+    if ((state == -1 || p->state == state) && (pid == -1 || p->pid == pid)) {
+      cprintf("pid: %d state: %s name: %s\n", p->pid, state_name, p->name);
     }
-    release(&ptable.lock);
-    return 22; //0?
+  }
+  return 0;
 }

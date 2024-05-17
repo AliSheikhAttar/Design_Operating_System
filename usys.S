@@ -30,3 +30,10 @@ SYSCALL(sbrk)
 SYSCALL(sleep)
 SYSCALL(uptime)
 SYSCALL(ps)
+
+// usys.S
+.globl sys_ps
+sys_ps:
+    movl SYS_ps, %eax
+    int $64
+    ret

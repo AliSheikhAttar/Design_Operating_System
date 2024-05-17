@@ -90,8 +90,7 @@ sys_uptime(void)
   return xticks;
 }
 
-int 
-sys_ps(void)
-{
-  return ps();
-}
+int sys_ps(void);
+// {
+//   return ps();
+// }
