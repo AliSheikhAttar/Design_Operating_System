@@ -533,68 +533,120 @@ procdump(void)
     cprintf("\n");
   }
 }
-
 int sys_ps(void) {
-  int state_t;
-  int pid_t;
-  //struct proc_info* process_info_t = (struct proc_info*) malloc(sizeof(struct proc_info));
+
+  int state_t = -1;  // Default to no filtering by state
+  int pid_t = -1;    // Default to no filtering by PID
   struct proc *p;
   char *state_name;
   char *parent_state_name;
-
-  // Get the arguments from user space
+  int found = 0;
+  // Try to get state_t from user space, but don't fail if not provided
   if (argint(0, &state_t) < 0)
-    return -1;
+    state_t = -1;  // No input provided, so use default value
+
+  // Try to get pid_t from user space, but don't fail if not provided
   if (argint(1, &pid_t) < 0)
-    return -1;
-  //if (argptr(1, (char**)process_info_t, sizeof(struct proc_info)) < 0)
-   // return -1;
+    pid_t = -1;  // No input provided, so use default value
 
   // Iterate through the process table
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-    if (p->state == UNUSED)
-      state_name = "UNUSED";
-    else if (p->state == EMBRYO)
-      state_name = "EMBRYO";
-    else if (p->state == SLEEPING)
-      state_name = "SLEEPING";
-    else if (p->state == RUNNABLE)
-      state_name = "RUNNABLE";
-    else if (p->state == RUNNING)
-      state_name = "RUNNING";
-    else if (p->state == ZOMBIE)
-      state_name = "ZOMBIE";
-    else
-      state_name = "???";
     
-    if (p->parent->state == UNUSED)
-      parent_state_name = "UNUSED";
-    else if (p->parent->state == EMBRYO)
-      parent_state_name = "EMBRYO";
-    else if (p->parent->state == SLEEPING)
-      parent_state_name = "SLEEPING";
-    else if (p->parent->state == RUNNABLE)
-      parent_state_name = "RUNNABLE";
-    else if (p->parent->state == RUNNING)
-      parent_state_name = "RUNNING";
-    else if (p->parent->state == ZOMBIE)
-      parent_state_name = "ZOMBIE";
-    else
-      parent_state_name = "???";
-
-    // Filter based on state and PID
-    if ((state_t == -1 || p->state == state_t) && (pid_t == -1 || p->pid == pid_t)) {
-      cprintf("pid: %d state: %s name: %s ppid: %d pstate: %s\n", p->pid, state_name, p->name,
-                                                            p->parent->pid,parent_state_name);
-      //process_info_t->pid = p->pid;
-      //process_info_t->state = p->state;
-      //*process_info_t->parent = *p->parent;
-
-      //char* proc_name = (char*)malloc(sizeof(*p->name));
-      //snprintf(process_info_t->name, sizeof(process_info_t->name), "%s", p->name);
-
-
+    // Map the process state to its string representation
+    switch (p->state) {
+      case UNUSED:   state_name = "UNUSED";   break;
+      case EMBRYO:   state_name = "EMBRYO";   break;
+      case SLEEPING: state_name = "SLEEPING"; break;
+      case RUNNABLE: state_name = "RUNNABLE"; break;
+      case RUNNING:  state_name = "RUNNING";  break;
+      case ZOMBIE:   state_name = "ZOMBIE";   break;
+      default:       state_name = "UNKNOWN";  break;
     }
-  }
-  return 0;
+
+    // Map the parent process state to its string representation
+    if (p->parent) {  // Ensure p->parent is not null
+      switch (p->parent->state) {
+        case UNUSED:   parent_state_name = "UNUSED";   break;
+        case EMBRYO:   parent_state_name = "EMBRYO";   break;
+        case SLEEPING: parent_state_name = "SLEEPING"; break;
+        case RUNNABLE: parent_state_name = "RUNNABLE"; break;
+        case RUNNING:  parent_state_name = "RUNNING";  break;
+        case ZOMBIE:   parent_state_name = "ZOMBIE";   break;
+        default:       parent_state_name = "UNKNOWN";  break;
+      }
+    } else {
+      parent_state_name = "N/A";
+    }
+
+  
+        // Check for PID filter
+        if (pid_t != -1 && p->pid == pid_t) {
+            cprintf("pid: %d state: %s name: %s ppid: %d pstate: %s\n",
+                    p->pid, state_name, p->name,
+                    p->parent ? p->parent->pid : -1, parent_state_name);
+            found = 1;
+            return 0; // Found the specific process, return immediately
+        }
+
+        // Check for state filter
+        if (state_t != -1 && p->state == state_t) {
+            cprintf("pid: %d state: %s name: %s ppid: %d pstate: %s\n",
+                    p->pid, state_name, p->name,
+                    p->parent ? p->parent->pid : -1, parent_state_name);
+            found = 1;
+        }
+            // Print all processes if no specific state or PID is specified
+        if (state_t == -1 && pid_t == -1) {
+            // Print the process information
+          cprintf("pid: %d state: %s name: %s ppid: %d pstate: %s\n",
+                  p->pid, state_name, p->name,
+                  p->parent ? p->parent->pid : -1, parent_state_name);
+        }
+    }
+
+    // Additional search for close PIDs if no process found
+    if (!found && pid_t != -1) {
+        for (int i = 1; i < 6; i++) {
+          for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+              if (p->state == UNUSED) continue; // Skip UNUSED processes
+
+              if ((pid_t - p->pid) == i || (p->pid - pid_t) == i) {
+                  // Map the process state to its string representation
+                  switch (p->state) {
+                      case UNUSED:   state_name = "UNUSED";   break;
+                      case EMBRYO:   state_name = "EMBRYO";   break;
+                      case SLEEPING: state_name = "SLEEPING"; break;
+                      case RUNNABLE: state_name = "RUNNABLE"; break;
+                      case RUNNING:  state_name = "RUNNING";  break;
+                      case ZOMBIE:   state_name = "ZOMBIE";   break;
+                      default:       state_name = "UNKNOWN";  break;
+                  }
+
+                  // Map the parent process state to its string representation
+
+      if (p->parent) {  // Ensure p->parent is not null
+                            switch (p->parent->state) {
+                                case UNUSED:   parent_state_name = "UNUSED";   break;
+                                case EMBRYO:   parent_state_name = "EMBRYO";break;
+                                case SLEEPING: parent_state_name = "SLEEPING"; break;
+                                case RUNNABLE: parent_state_name = "RUNNABLE"; break;
+                                case RUNNING:  parent_state_name = "RUNNING";  break;
+                                case ZOMBIE:   parent_state_name = "ZOMBIE";   break;
+                                default:       parent_state_name = "UNKNOWN";  break;
+                            }
+                        } else {
+                            parent_state_name = "N/A";
+                        }
+
+                        // Print the process information
+                        cprintf("pid: %d state: %s name: %s ppid: %d pstate: %s\n",
+                                p->pid, state_name, p->name,
+                                p->parent ? p->parent->pid : -1, parent_state_name);
+                        return 0;
+                    }
+                }
+              }
+          }
+
+          return 0;
 }
