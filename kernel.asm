@@ -7643,7 +7643,7 @@ myproc(void) {
 80103cdb:	83 c4 10             	add    $0x10,%esp
 80103cde:	85 c0                	test   %eax,%eax
 80103ce0:	7e 1b                	jle    80103cfd <scheduler+0x9d>
-        cprintf("turnaround time is for process %s (pid = $d) is %d\n\n",p->name, p->pid, (p->terminate_time - p->init_time));
+        cprintf("turnaround time is for process %s (pid = %d) is %d\n\n",p->name, p->pid, (p->terminate_time - p->init_time));
 80103ce2:	2b 83 80 00 00 00    	sub    0x80(%ebx),%eax
 80103ce8:	50                   	push   %eax
 80103ce9:	8d 43 6c             	lea    0x6c(%ebx),%eax
@@ -12001,7 +12001,7 @@ tvinit(void)
 80105dc8:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
 80105dcf:	90                   	nop
     SETGATE(idt[i], 0, SEG_KCODE<<3, vectors[i], 0);
-80105dd0:	8b 14 85 10 b0 10 80 	mov    -0x7fef4ff0(,%eax,4),%edx
+80105dd0:	8b 14 85 0c b0 10 80 	mov    -0x7fef4ff4(,%eax,4),%edx
 80105dd7:	c7 04 c5 c2 4f 11 80 	movl   $0x8e000008,-0x7feeb03e(,%eax,8)
 80105dde:	08 00 00 8e 
 80105de2:	66 89 14 c5 c0 4f 11 	mov    %dx,-0x7feeb040(,%eax,8)
@@ -12018,7 +12018,7 @@ tvinit(void)
   initlock(&tickslock, "time");
 80105dff:	83 ec 08             	sub    $0x8,%esp
   SETGATE(idt[T_SYSCALL], 1, SEG_KCODE<<3, vectors[T_SYSCALL], DPL_USER);
-80105e02:	a1 10 b1 10 80       	mov    0x8010b110,%eax
+80105e02:	a1 0c b1 10 80       	mov    0x8010b10c,%eax
 80105e07:	c7 05 c2 51 11 80 08 	movl   $0xef000008,0x801151c2
 80105e0e:	00 00 ef 
   initlock(&tickslock, "time");
@@ -12297,10 +12297,10 @@ rcr2(void)
 801060a3:	8b 15 08 b0 10 80    	mov    0x8010b008,%edx
 801060a9:	39 50 7c             	cmp    %edx,0x7c(%eax)
 801060ac:	0f 8c f3 fd ff ff    	jl     80105ea5 <trap+0x35>
-        myproc()->time_slice = 0; // Reset the time slice
+        myproc()->time_slice = 0; 
 801060b2:	e8 e9 d8 ff ff       	call   801039a0 <myproc>
 801060b7:	c7 40 7c 00 00 00 00 	movl   $0x0,0x7c(%eax)
-        yield(); // Switch to the next process
+        yield(); 
 801060be:	e8 bd df ff ff       	call   80104080 <yield>
     lapiceoi();
 801060c3:	e9 dd fd ff ff       	jmp    80105ea5 <trap+0x35>

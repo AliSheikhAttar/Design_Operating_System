@@ -6,7 +6,6 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
-int split_time = 5;
 // #include "umalloc.c"
 // #include <stdio.h>
 struct {
@@ -332,7 +331,7 @@ scheduler(void)
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
-  // int terminated = 0;
+  int terminated = 0;
 
   for(;;){
     // Enable interrupts on this processor.
@@ -341,7 +340,7 @@ scheduler(void)
     // Loop over process table looking for process to run.
 
     acquire(&ptable.lock);
-    // terminated = 0;
+    terminated = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
@@ -353,10 +352,10 @@ scheduler(void)
       switchuvm(p);
       p->state = RUNNING;
       swtch(&(c->scheduler), p->context);
-      if (p->terminate_time >0)
+      if (p->terminate_time >0 && terminated == 0)
       { 
-        // terminated += 1;
-        cprintf("turnaround time is for process %s (pid = $d) is %d\n\n",p->name, p->pid, (p->terminate_time - p->init_time));
+        terminated += 1;
+        cprintf("turnaround time is for process %s (pid = %d) is %d\n\n",p->name, p->pid, (p->terminate_time - p->init_time));
       }
       switchkvm();
 
@@ -364,17 +363,17 @@ scheduler(void)
       // It should have changed its p->state before coming back.
       c->proc = 0;
     }
-    // if (terminated == 0)
-    // {
-    //     if (time_slice > 1000000)
-    //     {
-    //       time_slice = 2;
-    //     }
-    //     else{
-    //       time_slice *= 2;
-    //     }
+    if (terminated == 0)
+    {
+        if (time_slice > 1000000)
+        {
+          time_slice = 2;
+        }
+        else{
+          time_slice *= 2;
+        }
         
-    // }
+    }
 
     release(&ptable.lock);
 

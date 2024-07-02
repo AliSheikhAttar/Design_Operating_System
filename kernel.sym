@@ -465,7 +465,7 @@
 80112d20 ptable
 80102480 ioapicenable
 80104a00 popcli
-8010b010 vectors
+8010b00c vectors
 8010649b vector52
 80106362 vector17
 801069e7 vector184
@@ -501,7 +501,6 @@
 8010681f vector146
 80106a3b vector191
 80106666 vector103
-8010b00c split_time
 801058f0 sys_mknod
 80102940 lapicstartap
 80106f90 switchuvm

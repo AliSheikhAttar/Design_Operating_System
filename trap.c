@@ -57,8 +57,8 @@ trap(struct trapframe *tf)
     if(myproc() && myproc()->state == RUNNING) {
       myproc()->time_slice++;
       if(myproc()->time_slice >= time_slice){
-        myproc()->time_slice = 0; // Reset the time slice
-        yield(); // Switch to the next process
+        myproc()->time_slice = 0; 
+        yield(); 
       }
     }
     lapiceoi();
