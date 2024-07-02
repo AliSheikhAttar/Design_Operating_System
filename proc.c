@@ -344,7 +344,6 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
-      myproc()->time_slice = DEFAULT_TIMESLICE; // Reset the time slice
 
       swtch(&(c->scheduler), p->context);
       switchkvm();

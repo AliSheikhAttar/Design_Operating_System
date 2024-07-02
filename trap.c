@@ -58,8 +58,10 @@ trap(struct trapframe *tf)
       cprintf("timer interrupt = %d\n",ticks);
       int x = myproc()->time_slice;
       myproc()->time_slice = x-1;
-      cprintf("time_slice %d for process %s\n",myproc()->time_slice, myproc()->name);
+      cprintf("time_slice %d for process %s(%d)\n",myproc()->time_slice, myproc()->name, myproc()->pid);
       if(myproc()->time_slice <= 0){
+        cprintf("time to reset for process %s(%d)\n",myproc()->time_slice, myproc()->name, myproc()->pid);
+        myproc()->time_slice = DEFAULT_TIMESLICE; // Reset the time slice
         yield(); // Switch to the next process
       }
     }
