@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+
 // #include "umalloc.c"
 // #include <stdio.h>
 struct {
@@ -533,24 +534,37 @@ procdump(void)
     cprintf("\n");
   }
 }
-int simple_strncmp(const char *s1, const char *s2, int n) {
-    while(n > 0 && *s1 && (*s1 == *s2)) {
-        s1++;
-        s2++;
-        n--;
+int compareStrings(const char *str1, const char *str2) {
+    while (*str1 && (*str1 == *str2)) {
+        str1++;
+        str2++;
     }
-    if(n == 0) {
-        return 0;
-    } else {
-        return *(unsigned char *)s1 - *(unsigned char *)s2;
+
+    return *(unsigned char *)str1 - *(unsigned char *)str2;
+}
+
+
+
+int mstrcmp(const char *str1, const char *str2) {
+    // Check each character of both strings
+    while (*str1 && *str2) {
+        // If characters differ, strings are not equal
+        if (*str1 != *str2) {
+            return 0;
+        }
+        // Move to the next character
+        str1++;
+        str2++;
     }
+    // If both strings reached the end, they are equal
+    return *str1 == '\0' && *str2 == '\0';
 }
 
 int sys_ps(void) {
 
   int state_t = -1;  // Default to no filtering by state
   int pid_t = -1; 
-  char* name_t = "00000";   // Default to no filtering by PID
+  char* name_t = "None";   // Default to no filtering by PID
   struct proc *p;
   char *state_name;
   char *parent_state_name;
@@ -563,11 +577,17 @@ int sys_ps(void) {
   if (argint(1, &pid_t) < 0)
     pid_t = -1;  // No input provided, so use default value
 
-  if (argstr(2, &name_t) < 0)
-      name_t = "None"; 
+  if(argstr(2, &name_t) < 0){
+    name_t = "None";  
+  }
+  
+
+  cprintf("state-kernelspace: %d\n",pid_t);
+  cprintf("state-kernelspace: %d\n",state_t);
+  cprintf("name-kernelspace: %s\n",name_t);
+
   // Iterate through the process table
-  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-    
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {   
     // Map the process state to its string representation
     switch (p->state) {
       case UNUSED:   state_name = "UNUSED";   break;
@@ -613,19 +633,22 @@ int sys_ps(void) {
         }
 
         // Check for name filter
-        char notfound[4] = "None";
-        if (simple_strncmp(name_t,notfound, 4) && simple_strncmp(p->name,name_t, strlen(p->name))) {
-        cprintf("pid: %d state: %s name: %s ppid: %d pstate: %s\n",
-                p->pid, state_name, p->name,
-                p->parent ? p->parent->pid : -1, parent_state_name);
-        found = 1;
+        if(mstrcmp(name_t,"None")==0) {
+          if(mstrcmp(p->name,name_t)!=0){
+            cprintf("pid: %d state: %s name: %s ppid: %d pstate: %s\n",
+                    p->pid, state_name, p->name,
+                    p->parent ? p->parent->pid : -1, parent_state_name);
+            found = 1;
+          }
         }
+
             // Print all processes if no specific state or PID is specified
-        if (state_t == -1 && pid_t == -1) {
+        if (state_t == -1 && pid_t == -1 && mstrcmp(name_t,"None")==1) {
             // Print the process information
           cprintf("pid: %d state: %s name: %s ppid: %d pstate: %s\n",
                   p->pid, state_name, p->name,
                   p->parent ? p->parent->pid : -1, parent_state_name);
+          found = 1;
         }
     }
 

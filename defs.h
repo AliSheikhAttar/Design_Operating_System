@@ -129,7 +129,7 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-int             ps(int, int, struct proc_info*);
+int             ps(int, int, char*,  struct proc_info*);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

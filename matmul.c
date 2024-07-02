@@ -1,8 +1,9 @@
 #include "types.h"
 #include "stat.h"
 #include "user.h"
+#include "fcntl.h"
 
-#define N 64
+#define N 16
 
 void matrix_multiply(int A[N][N], int B[N][N], int C[N][N]) {
     int i, j, k;
