@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
         exit();
     }
 
-    // Create second child process for writing to files
+    // Create second child process for writing to files 
     if ((pid2 = fork()) == 0) {
         // Child process 2: Write text to files
 
