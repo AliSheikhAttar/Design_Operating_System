@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
     // Create first child process for matrix multiplication
     if ((pid1 = fork()) == 0) {
         // Child process 1: Matrix multiplication
-        for (int i = start_index; i <= 200; i++) {
+        for (int i = start_index; i <= 50; i++) {
             char filename[20]; // Sufficient buffer size for "fileX.txt" where X is up to 100
             create_filename("file", i, filename);
 

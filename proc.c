@@ -6,7 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
-
+int split_time = 10;
 // #include "umalloc.c"
 // #include <stdio.h>
 struct {
@@ -15,7 +15,7 @@ struct {
 } ptable;
 
 static struct proc *initproc;
-
+int time_slice = DEFAULT_TIME_SLICE;
 int nextpid = 1;
 extern void forkret(void);
 extern void trapret(void);
@@ -89,8 +89,11 @@ allocproc(void)
 
 found:
   p->state = EMBRYO;
+  p->init_time = ticks;
   p->pid = nextpid++;
-  p->time_slice = DEFAULT_TIMESLICE; 
+  p->time_slice = 0; 
+  p->terminate_time = 0; 
+  cprintf("process %s (%d)started +++++++++++++++++++++++++++++++++++++++++\n",p->name, p->pid);
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -265,6 +268,9 @@ exit(void)
 
   // Jump into the scheduler, never to return.
   curproc->state = ZOMBIE;
+  curproc->terminate_time = ticks;
+  curproc->init_time = 0;
+  cprintf("process %s (%d)finished -----------------------------------------------------\n",p->name, p->pid);
   sched();
   panic("zombie exit");
 }
@@ -327,12 +333,13 @@ scheduler(void)
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
-  
   for(;;){
     // Enable interrupts on this processor.
     sti();
 
     // Loop over process table looking for process to run.
+
+    int terminated = 0;
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
@@ -344,8 +351,22 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
-
       swtch(&(c->scheduler), p->context);
+      if (p->terminate_time >0 && !terminated)
+      { 
+        terminated =1;
+        cprintf("for process name %s\n", p->name);
+        cprintf("\n\n!!!!terminate time !!!!!!!!:  %d  !\n\n",p->terminate_time);
+        cprintf("\n\n!!!!quantom time !!!!!!!!:  %d  !\n\n",time_slice);
+        cprintf("elapsed time is %d\n\n", p->terminate_time - p->init_time);
+      }
+      
+  
+      if (!terminated)
+      {
+          time_slice *=2;
+      }
+      
       switchkvm();
 
       // Process is done running for now.
@@ -354,6 +375,7 @@ scheduler(void)
     }
     release(&ptable.lock);
 
+    
   }
 }
 
@@ -364,6 +386,7 @@ scheduler(void)
 // be proc->intena and proc->ncli, but that would
 // break in the few places where a lock is held but
 // there's no process.
+
 void
 sched(void)
 {

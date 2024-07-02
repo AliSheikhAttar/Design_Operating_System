@@ -13,7 +13,7 @@ struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
-
+extern int time_slice;
 void
 tvinit(void)
 {
@@ -57,11 +57,11 @@ trap(struct trapframe *tf)
     if(myproc() && myproc()->state == RUNNING) {
       cprintf("timer interrupt = %d\n",ticks);
       int x = myproc()->time_slice;
-      myproc()->time_slice = x-1;
+      myproc()->time_slice = x+1;
       cprintf("time_slice %d for process %s(%d)\n",myproc()->time_slice, myproc()->name, myproc()->pid);
-      if(myproc()->time_slice <= 0){
+      if(myproc()->time_slice >= time_slice){
         cprintf("time to reset for process %s(%d)\n",myproc()->time_slice, myproc()->name, myproc()->pid);
-        myproc()->time_slice = DEFAULT_TIMESLICE; // Reset the time slice
+        myproc()->time_slice = 0; // Reset the time slice
         yield(); // Switch to the next process
       }
     }
