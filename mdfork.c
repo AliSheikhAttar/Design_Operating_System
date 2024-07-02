@@ -2,7 +2,7 @@
 #include "user.h"
 #include "fcntl.h"
 
-#define N 16
+#define N 8
 
 // Utility function to convert an integer to a string
 void int_to_str(int n, char *str) {
@@ -111,6 +111,8 @@ void print_matrix(int matrix[N][N]) {
 }
 
 int main(int argc, char *argv[]) {
+     int start_time, end_time;
+    start_time = uptime();
     if (argc < 2) {
         // Print usage message to stderr (fd 2)
         printf(2, "Usage: mdfork <text> [start_index]\n");
@@ -177,5 +179,7 @@ int main(int argc, char *argv[]) {
     wait();
 
     printf(1, "Both child processes completed\n");
+    end_time = uptime();
+    printf(1, "Time taken: %d ticks\n", end_time - start_time);
     exit();
 }

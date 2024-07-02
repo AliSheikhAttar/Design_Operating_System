@@ -85,6 +85,8 @@ void write_to_file(char *filename, char *text) {
 }
 
 int main(int argc, char *argv[]) {
+        int start_time, end_time;
+         start_time = uptime();
     if (argc < 2) {
         // Print usage message to stderr (fd 2)
         printf(2, "Usage: create_files <text> [start_index]\n");
@@ -105,6 +107,7 @@ int main(int argc, char *argv[]) {
         // Write to the file directly
         write_to_file(filename, text);
     }
-
+    end_time = uptime();
+    printf(1, "Time taken: %d ticks\n", end_time - start_time);
     exit();
 }

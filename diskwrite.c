@@ -36,6 +36,9 @@ void write_to_file(char *filename, char *text) {
 }
 
 int main(int argc, char *argv[]) {
+    int start_time, end_time;
+    start_time = uptime();
+
     if (argc < 3) {
         // Print usage message to stderr (fd 2)
         printf(2, "Usage: diskwrite <filename> <text>\n");
@@ -44,5 +47,7 @@ int main(int argc, char *argv[]) {
 
     //printf(1, "Calling write_to_file with %s and %s\n", argv[1], argv[2]); // Debugging print
     write_to_file(argv[1], argv[2]);
+    end_time = uptime();
+    printf(1, "Time taken: %d ticks\n", end_time - start_time);
     exit();
 }

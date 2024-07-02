@@ -28,9 +28,11 @@ void print_matrix(int matrix[N][N]) {
 }
 
 int main(int argc, char *argv[]) {
+     int start_time, end_time;
+    start_time = uptime();
     int A[N][N], B[N][N], C[N][N];
     int i, j;
-    printf(1, "1\n");
+    //printf(1, "1\n");
 
     // Initialize matrices A and B with some values
     for (i = 0; i < N; i++) {
@@ -39,14 +41,15 @@ int main(int argc, char *argv[]) {
             B[i][j] = i - j;
         }
     }
-    printf(1, "2\n");
+    //printf(1, "2\n");
     // Perform matrix multiplication
     matrix_multiply(A, B, C);
-    printf(1, "2\n");
+    //printf(1, "2\n");
 
     // Print the result
     print_matrix(C);
-    printf(1, "3\n");
-
+    //printf(1, "3\n");
+end_time = uptime();
+    printf(1, "Time taken: %d ticks\n", end_time - start_time);
     exit();
 }
