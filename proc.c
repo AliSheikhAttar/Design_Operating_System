@@ -90,7 +90,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
-
+  p->time_slice = DEFAULT_TIMESLICE; 
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -344,6 +344,7 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
+      myproc()->time_slice = DEFAULT_TIMESLICE; // Reset the time slice
 
       swtch(&(c->scheduler), p->context);
       switchkvm();

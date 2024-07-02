@@ -54,6 +54,15 @@ trap(struct trapframe *tf)
       wakeup(&ticks);
       release(&tickslock);
     }
+    if(myproc() && myproc()->state == RUNNING) {
+      cprintf("timer interrupt = %d\n",ticks);
+      int x = myproc()->time_slice;
+      myproc()->time_slice = x-1;
+      cprintf("time_slice %d for process %s\n",myproc()->time_slice, myproc()->name);
+      if(myproc()->time_slice <= 0){
+        yield(); // Switch to the next process
+      }
+    }
     lapiceoi();
     break;
   case T_IRQ0 + IRQ_IDE:

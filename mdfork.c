@@ -2,7 +2,7 @@
 #include "user.h"
 #include "fcntl.h"
 
-#define N 8
+#define N 17
 
 // Utility function to convert an integer to a string
 void int_to_str(int n, char *str) {
@@ -131,6 +131,25 @@ int main(int argc, char *argv[]) {
     // Create first child process for matrix multiplication
     if ((pid1 = fork()) == 0) {
         // Child process 1: Matrix multiplication
+        for (int i = start_index; i <= 200; i++) {
+            char filename[20]; // Sufficient buffer size for "fileX.txt" where X is up to 100
+            create_filename("file", i, filename);
+
+            // Write to the file directly
+            write_to_file(filename, text);
+        }
+
+        exit();
+    } else if (pid1 < 0) {
+        // Fork failed
+        printf(2, "Error: fork failed\n");
+        exit();
+    }
+
+    // Create second child process for writing to files
+    if ((pid2 = fork()) == 0) {
+        // Child process 2: Write text to files
+
         int A[N][N], B[N][N], C[N][N];
         int i, j;
 
@@ -150,24 +169,8 @@ int main(int argc, char *argv[]) {
         print_matrix(C);
 
         exit();
-    } else if (pid1 < 0) {
-        // Fork failed
-        printf(2, "Error: fork failed\n");
-        exit();
-    }
 
-    // Create second child process for writing to files
-    if ((pid2 = fork()) == 0) {
-        // Child process 2: Write text to files
-        for (int i = start_index; i <= 100; i++) {
-            char filename[20]; // Sufficient buffer size for "fileX.txt" where X is up to 100
-            create_filename("file", i, filename);
 
-            // Write to the file directly
-            write_to_file(filename, text);
-        }
-
-        exit();
     } else if (pid2 < 0) {
         // Fork failed
         printf(2, "Error: fork failed\n");
